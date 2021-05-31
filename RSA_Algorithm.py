@@ -26,11 +26,10 @@ maxN = 2000
 """
 Algoritmo RSA
 
-Tomar 2 primos distintos y grandes 𝑝, 𝑞
-Longitud de bytes similar
+Tomar 2 primos distintos y grandes 𝑝, 𝑞 con longitud de bytes similar
 𝑛 = 𝑝 * 𝑞
-El totiente de n es 𝜑(𝑛) = (𝑝 - 1) * (𝑞 - 1)
-Tomar un 𝑒 coprimo 1 < 𝑒 < n
+El totiente de 𝑛 es 𝜑(𝑛) = (𝑝 - 1) * (𝑞 - 1)
+Tomar un 𝑒 coprimo 1 < 𝑒 < 𝑛
 𝑑 = 𝑑 * 𝑒 ≡ 1 mod 𝜑(𝑛)
 La llave publica es (𝑒, 𝑛)
 La llave privada es (𝑑, 𝑛)
@@ -145,9 +144,9 @@ class App(Frame):
         # generar la llave privada
         d = self.mod_inverse(e, phi)
 
-        # llave publica y privada
-        self.publicKey = (e, n)
-        self.privateKey = (d, n)
+        # llave publica y privada en hexadecimal
+        self.publicKey = (hex(e), hex(n))
+        self.privateKey = (hex(d), hex(n))
 
         self.createKeysMsgWidgets()
 
@@ -169,8 +168,8 @@ class App(Frame):
         self.privateKeyEntry = Entry(self, textvariable=self.privateKeyData, justify="center", state='readonly')
         self.privateKeyEntry.grid(row=4, column=4, columnspan=3, sticky=W+E)
 
-        self.publicKeyData.set(str(self.publicKey))
-        self.privateKeyData.set(str(self.privateKey))
+        self.publicKeyData.set("%s-%s" % self.publicKey)
+        self.privateKeyData.set("%s-%s" % self.privateKey)
 
         self.messageLabel = Label(self, text="Mensaje")
         self.messageLabel.grid(row=5, column=0, columnspan=5, sticky=W+E)
@@ -185,7 +184,7 @@ class App(Frame):
     def encrypt(self):
         msg = self.message.get()
         if len(msg) > 0:
-            key, n = self.publicKey
+            key, n = int(self.publicKey[0], 16), int(self.publicKey[1], 16)
             # convertir cada caracter del mensaje a numeros hexadecimales usando la llave publica (a^b mod n)
             self.cipher = [hex(pow(ord(char), key, n)) for char in msg]
 
@@ -206,7 +205,7 @@ class App(Frame):
 
     # desencriptar el mensaje cifrado a texto
     def decrypt(self):
-        key, n = self.privateKey
+        key, n = int(self.privateKey[0], 16), int(self.privateKey[1], 16)
         # convertir a texto los valores hexadecimales del cipher usando la llave privada (a^b mod n)
         decipher = [chr(pow(int(char, 16), key, n)) for char in self.cipher]
         
