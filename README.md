@@ -11,4 +11,8 @@ Algoritmo RSA para criptosistemas hecho en Python
 - La llave publica es (𝑒, 𝑛)
 - La llave privada es (𝑑, 𝑛)
 
+Link del video: https://youtu.be/JvVAmgv-Z-k
+
+Ejemplo:
+
 ![ejemplo](https://user-images.githubusercontent.com/30879359/120264720-fb623400-c263-11eb-84de-34526e52c495.png)
