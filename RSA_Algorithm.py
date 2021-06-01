@@ -1,32 +1,12 @@
 # Luis Bodart A01635000
 
-from random import randrange
+from random import choice, randrange
 from tkinter import *
-
-# Numeros primos hasta el 2000
-primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71,
-          73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173,
-          179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281,
-          283, 297, 307, 311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 379, 383, 389, 397, 401, 409,
-          419, 421, 431, 433, 439, 443, 439, 457, 461, 463, 467, 479, 487, 491, 499, 503, 509, 521, 523, 541,
-          547, 557, 563, 569, 571, 577, 587, 593, 599, 601, 607, 613, 617, 619, 531, 641, 643, 647, 656, 659,
-          661, 679, 677, 683, 691, 701, 709, 719, 727, 733, 739, 743, 751, 757, 761, 769, 773, 787, 797, 809,
-          811, 821, 823, 827, 829, 839, 853, 857, 859, 863, 877, 881, 883, 887, 907, 911, 919, 929, 937, 941,
-          947, 953, 967, 971, 977, 983, 991, 997, 1009, 1013, 1019, 1021, 1031, 1033, 1039, 1049, 1051, 1061, 1063, 1069,
-          1087, 1091, 1093, 1097, 1103, 1109, 1117, 1123, 1129, 1151, 1153, 1163, 1171, 1181, 1187, 1193, 1201, 1213, 1217, 1223,
-          1229, 1231, 1237, 1249, 1259, 1277, 1279, 1283, 1289, 1291, 1297, 1301, 1303, 1307, 1319, 1321, 1327, 1361, 1367, 1373,
-          1381, 1399, 1409, 1423, 1427, 1429, 1433, 1439, 1447, 1451, 1453, 1459, 1471, 1481, 1483, 1487, 1489, 1493, 1499, 1511,
-          1523, 1531, 1543, 1549, 1553, 1559, 1567, 1571, 1579, 1583, 1597, 1601, 1607, 1609, 1613, 1619, 1621, 1627, 1637, 1657,
-          1663, 1667, 1669, 1693, 1697, 1699, 1709, 1721, 1723, 1733, 1741, 1747, 1753, 1759, 1777, 1783, 1787, 1789, 1801, 1811,
-          1823, 1831, 1847, 1861, 1867, 1871, 1873, 1877, 1879, 1889, 1901, 1907, 1913, 1931, 1933, 1949, 1951, 1973, 1979, 1987,
-          1993, 1997, 1999]
-
-maxN = 2000
 
 """
 Algoritmo RSA
 
-Tomar 2 primos distintos y grandes 𝑝, 𝑞 con longitud de bytes similar
+Tomar 2 primos distintos y grandes 𝑝, 𝑞 con longitud de bits similar
 𝑛 = 𝑝 * 𝑞
 El totiente de 𝑛 es 𝜑(𝑛) = (𝑝 - 1) * (𝑞 - 1)
 Tomar un 𝑒 coprimo 1 < 𝑒 < 𝑛
@@ -105,30 +85,55 @@ class App(Frame):
             d = y1
             y1 = y
         return d + mod
+    
+    # exponenciacion rapida
+    def fast_pow(self, a, n):
+        if (n == 0):
+            return 1
+        x = self.fast_pow(a, n // 2)
+        x = x * x
+        if (n % 2 == 1):
+            x = x * a
+        return x
 
     # generar las llaves publicas y privadas
     def generate_key_pair(self):
         self.generateStatus.set("Generando llaves...")
 
-        # sacar la posicion del arreglo de numeros primos
-        pPos = randrange(0, len(primes))
-        qPos = randrange(0, len(primes))
-
-        # verificar que no sean la misma posicion
-        while pPos == qPos:
-            pPos = randrange(0, len(primes))
-            qPos = randrange(0, len(primes))
-
-        p = primes[pPos]
-        q = primes[qPos]
+        # longitud en bits 3-5
+        bits = self.fast_pow(2, randrange(3, 6))
         
-        # verificar que p y q sean numeros primos
-        while not (self.is_prime(p) and self.is_prime(q)):
-            p = randrange(2, maxN)
-            q = randrange(2, maxN)
+        # min y max numero con longitud en bits similar
+        min = self.fast_pow(2, bits - 1)
+        max = self.fast_pow(2, bits) - 1
+        
+        # los primeros 10 num primos
+        primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29]
+        
+        # inicio y fin de los numeros primos
+        start = 2 ** (bits // 2 - 1)
+        stop = 2 ** (bits // 2 + 1)    
+        
+        # generar los numeros primos
+        for i in range(31, stop + 1, 2):
+            if self.is_prime(i):
+                primes.append(i)
+        
+        # asegurar que todos los primos >= start
+        while (primes and primes[0] < start):
+            primes.pop(0)
+        
+        # elegir p y q de los primos generados
+        while primes:
+            p = choice(primes)
+            primes.remove(p)
+            q_values = [q for q in primes if min <= p*q <= max]
+            if q_values:
+                q = choice(q_values)
+                break
 
         n = p * q
-
+        
         # totiente de n
         phi = (p - 1) * (q - 1)
 
@@ -143,7 +148,7 @@ class App(Frame):
 
         # generar la llave privada
         d = self.mod_inverse(e, phi)
-
+        
         # llave publica y privada en hexadecimal
         self.publicKey = (hex(e), hex(n))
         self.privateKey = (hex(d), hex(n))
@@ -198,7 +203,7 @@ class App(Frame):
             self.encryptedMsg = Entry(self, textvariable=self.encryptedMsgData, justify="center", state='readonly', xscrollcommand=self.scrollbar.set)
             self.encryptedMsg.grid(row=8, column=0, columnspan=5, sticky=W+E)
             
-            self.decryptMsg = Button(self, text="Desencriptar Mensaje", command=self.decrypt)
+            self.decryptMsg = Button(self, text="Descifrar Mensaje", command=self.decrypt)
             self.decryptMsg.grid(row=8, column=5, columnspan=2, sticky=N+S+W+E)
 
             self.encryptedMsgData.set(''.join(map(lambda x: str(x), self.cipher)))
@@ -209,7 +214,7 @@ class App(Frame):
         # convertir a texto los valores hexadecimales del cipher usando la llave privada (a^b mod n)
         decipher = [chr(pow(int(char, 16), key, n)) for char in self.cipher]
         
-        self.decryptedMsgLabel = Label(self, text="Mensaje Desencriptado")
+        self.decryptedMsgLabel = Label(self, text="Mensaje Descifrado")
         self.decryptedMsgLabel.grid(row=10, column=0, columnspan=6, sticky=W+E)
         
         self.decryptedMsgData = StringVar()
